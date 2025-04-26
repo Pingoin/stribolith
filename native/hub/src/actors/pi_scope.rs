@@ -5,7 +5,7 @@ use xactor::*;
 
 use crate::{
     generated::open_pi_scope::{
-        GnssDataRequest, open_pi_scope_server_client::OpenPiScopeServerClient,
+        open_pi_scope_server_client::OpenPiScopeServerClient, GnssDataRequest, OrientationDataRequest
     },
     signals::MyPreciousData,
 };
@@ -21,8 +21,12 @@ impl PiScopeConnector {}
 #[async_trait::async_trait]
 impl Actor for PiScopeConnector {
     async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
-        println!("OpenPiScopeConnector Parent Started");
-        // Nebenläufig Daten vom Server laden
+        println!("OpenPiScopeConnector Started");
+
+        let client = OpenPiScopeServerClient::connect("http://192.168.178.84:50051")
+        .await
+        .unwrap();
+
         let addr = ctx.address().clone();
         spawn(async move {
             let receiver = MyPreciousData::get_dart_signal_receiver();
@@ -31,21 +35,34 @@ impl Actor for PiScopeConnector {
                 let _ = addr.call(message).await;
             }
         });
-
+        let mut gnssclient=client.clone();
         spawn(async move {
             loop {
-                let mut client = OpenPiScopeServerClient::connect("http://192.168.178.84:50051")
-                    .await
-                    .unwrap();
-                let gnss = client.get_gnss_data(GnssDataRequest {}).await.unwrap();
-                debug_print!("{:?}", &gnss);
+
+                let gnss = gnssclient.get_gnss_data(GnssDataRequest {}).await.unwrap();
                 if let Some(gnss) = gnss.into_inner().gnss_data {
                     gnss.send_signal_to_dart();
                 }
                 sleep(Duration::from_secs(1)).await;
             }
         });
+        let mut ins_client=client.clone();
+        spawn(async move {
+            loop{
 
+                let ins_data=ins_client.get_orientation_data(OrientationDataRequest{}).await.unwrap().into_inner();
+
+                if let Some(euler) = ins_data.euler {
+                    euler.send_signal_to_dart();
+                }
+                if let Some(quaternion) = ins_data.quaternion {
+                    quaternion.send_signal_to_dart();
+                }
+                
+            }
+
+
+        });
         Ok(())
     }
 }

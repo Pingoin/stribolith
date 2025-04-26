@@ -112,15 +112,41 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            // Rebuild the widget from Rust signals on each render frame.
+            // Some Rust signals between frames may be ignored.
+            StreamBuilder(
+              stream: GnssData.rustSignalStream,
+              builder: (context, snapshot) {
+                final signalPack = snapshot.data;
+                if (signalPack == null) {
+                  return Text("bla");
+                } else {
+                  GnssData message = signalPack.message;
+                  return Text(message.satellites.length.toString());
+                }
+              },
+            ),
+                        StreamBuilder(
+              stream: EulerAngle.rustSignalStream,
+              builder: (context, snapshot) {
+                final signalPack = snapshot.data;
+                if (signalPack == null) {
+                  return Text("bla");
+                } else {
+                  EulerAngle message = signalPack.message;
+                  return Text(message.pitch.toStringAsPrecision(6));
+                }
+              },
+            ),
             ElevatedButton(
-      onPressed: () async {
-        MyPreciousData(
-          inputNumbers: [3, 4, 5],
-          inputString: 'Zero-cost abstraction',
-        ).sendSignalToRust(); // GENERATED
-      },
-      child: Text('Send a Signal from Dart to Rust'),
-    ),
+              onPressed: () async {
+                MyPreciousData(
+                  inputNumbers: [3, 4, 5],
+                  inputString: 'Zero-cost abstraction',
+                ).sendSignalToRust(); // GENERATED
+              },
+              child: Text('Send a Signal from Dart to Rust'),
+            ),
           ],
         ),
       ),
