@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::create_dir_all(&out_dir)?;
     tonic_build::configure()
         .out_dir(&out_dir)
-        .message_attribute(".", "#[derive(serde::Deserialize, serde::Serialize)]")
+        .message_attribute(".", "#[derive(serde::Deserialize, serde::Serialize, rinf::DartSignal,rinf::RustSignal, rinf::SignalPiece)]")
         //.file_descriptor_set_path(out_dir.join("reflection.bin"))
         .build_server(false)
         .build_client(true)

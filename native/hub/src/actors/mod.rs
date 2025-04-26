@@ -2,19 +2,22 @@
 //! To build a solid app, avoid communicating by sharing memory.
 //! Focus on message passing instead.
 
-mod first;
-mod second;
+//mod first;
+//mod second;
+mod pi_scope;
+use std::time::Duration;
+use tokio::time::sleep;
 
-use first::FirstActor;
-use messages::prelude::Context;
-use second::SecondActor;
-use tokio::spawn;
+use xactor::*;
+//use first::FirstActor;
+use pi_scope::Ping;
+use rinf::debug_print;
 
 // Uncomment below to target the web.
 // use tokio_with_wasm::alias as tokio;
 
 /// Creates and spawns the actors in the async system.
-pub async fn create_actors() {
+pub async fn create_actors()->Result<()> {
     // Though simple async tasks work, using the actor model
     // is highly recommended for state management
     // to achieve modularity and scalability in your app.
@@ -22,14 +25,18 @@ pub async fn create_actors() {
     // handling messages from other actors or external sources,
     // such as websockets or timers.
 
-    // Create actor contexts.
-    let first_context = Context::new();
-    let first_addr = first_context.address();
-    let second_context = Context::new();
+    let addr = pi_scope::PiScopeConnector{}.start().await?;
 
-    // Spawn the actors.
-    let first_actor = FirstActor::new(first_addr.clone());
-    spawn(first_context.run(first_actor));
-    let second_actor = SecondActor::new(first_addr);
-    spawn(second_context.run(second_actor));
+    sleep(Duration::from_secs(2)).await;
+
+    // Send Ping message.
+    // send() message returns Future object, that resolves to message result
+    let result = addr.call(Ping {}).await;
+
+    match result {
+        Ok(res) => debug_print!("Got result: {}", res),
+        Err(err) => debug_print!("Got error: {}", err),
+    };
+
+    Ok(())
 }

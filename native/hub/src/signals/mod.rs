@@ -1,31 +1,12 @@
-use rinf::{DartSignal, RustSignal, SignalPiece};
+use rinf::DartSignal;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, DartSignal)]
+#[derive(Deserialize, Serialize, Debug, DartSignal)]
 pub struct MyPreciousData {
-  pub input_numbers: Vec<i32>,
-  pub input_string: String,
+    pub input_numbers: Vec<i32>,
+    pub input_string: String,
 }
 
-/// To send data from Dart to Rust, use `DartSignal`.
-#[derive(Deserialize, DartSignal)]
-pub struct SmallText {
-    pub text: String,
+impl xactor::Message for MyPreciousData {
+    type Result = ();
 }
-
-/// To send data from Rust to Dart, use `RustSignal`.
-#[derive(Serialize, RustSignal)]
-pub struct SmallNumber {
-    pub number: i32,
-}
-
-/// A signal can be nested inside another signal.
-#[derive(Serialize, RustSignal)]
-pub struct BigBool {
-    pub member: bool,
-    pub nested: SmallBool,
-}
-
-/// To nest a signal inside other signal, use `SignalPiece`.
-#[derive(Serialize, SignalPiece)]
-pub struct SmallBool(pub bool);
