@@ -25,7 +25,7 @@ pub async fn create_actors()->Result<()> {
     // handling messages from other actors or external sources,
     // such as websockets or timers.
 
-    let addr = pi_scope::PiScopeConnector{}.start().await?;
+    let addr = pi_scope::PiScopeConnector::new().start().await?;
 
     sleep(Duration::from_secs(2)).await;
 

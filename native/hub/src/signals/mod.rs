@@ -10,3 +10,20 @@ pub struct MyPreciousData {
 impl xactor::Message for MyPreciousData {
     type Result = ();
 }
+
+#[derive(Deserialize, Serialize, Debug, DartSignal)]
+pub struct ConnectOpenPiScope{
+    pub host:String,
+}
+
+impl xactor::Message for ConnectOpenPiScope {
+    type Result = ();
+}
+
+#[derive(Deserialize, Serialize, Debug, DartSignal)]
+pub struct DisconnectOpenPiScope{
+}
+
+impl xactor::Message for DisconnectOpenPiScope {
+    type Result = ();
+}
