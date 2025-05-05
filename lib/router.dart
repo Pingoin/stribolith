@@ -4,6 +4,7 @@ import 'package:stribolith/components/layout.dart';
 import 'package:stribolith/pages/piscope.dart';
 import 'package:stribolith/pages/piscope/gnss_raw.dart';
 import 'package:stribolith/pages/piscope/orientation_raw.dart';
+import 'package:stribolith/pages/piscope/pi_scope_list.dart';
 
 // GoRouter configuration
 final router = GoRouter(
@@ -34,6 +35,15 @@ final baseRouteDestinations = [
     icon: Icon(Icons.rocket),
     children: [
       Destination(
+        name: "OpenPiScope",
+        path: "/",
+        page: (context, state, child, children) {
+          return PiScopeList();
+        },
+        children: [],
+        icon: Icon(Icons.rocket),
+      ),
+      Destination(
         name: "Gnss",
         path: "/gnss",
         page: (context, state, child, children) {
@@ -44,7 +54,7 @@ final baseRouteDestinations = [
       ),
             Destination(
         name: "Orientation",
-        path: "/",
+        path: "/orientation",
         page: (context, state, child, children) {
           return OrientationRaw();
         },

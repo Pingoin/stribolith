@@ -24,8 +24,9 @@ async fn main() {
     dart_shutdown().await;
 }
 
-pub struct MutexBox<T>{
-    inner:Arc<Mutex<Option<T>>>,
+pub struct MutexBox<T> {
+    inner: Arc<Mutex<Option<T>>>,
+    taken: Arc<Mutex<bool>>,
     notify: Arc<Notify>,
 }
 
@@ -36,6 +37,7 @@ where
     pub fn new() -> MutexBox<T> {
         Self {
             inner: Arc::new(Mutex::new(None)),
+            taken: Arc::new(Mutex::new(false)),
             notify: Arc::new(Notify::new()),
         }
     }
@@ -48,42 +50,59 @@ where
     {
         let mut lock = self.inner.lock().await;
         let value = lock.take()?;
+        let mut taken = self.taken.lock().await;
+        *taken = true;
+        drop(taken);
         drop(lock); // nicht während Await halten!
 
         let (new_value, result) = f(value).await;
 
         let mut lock = self.inner.lock().await;
         *lock = Some(new_value);
+        let mut taken = self.taken.lock().await;
+        *taken = false;
+        drop(taken);
         drop(lock);
         self.notify.notify_one();
         Some(result)
     }
 
-    pub async fn open_async<F, Fut, R>(&self, f: F) -> R
+    pub async fn is_taken(&self) -> bool {
+        let taken = self.taken.lock().await;
+        taken.clone()
+    }
+
+    pub async fn open_async<F, Fut, R>(&self, f: F) -> Option<R>
     where
         F: FnOnce(T) -> Fut + Clone,
         Fut: std::future::Future<Output = (T, R)>,
     {
         loop {
-            if let Some(result) = self.take_with(f.clone()).await {
-                return result;
+            if !self.is_taken().await {
+                return self.take_with(f.clone()).await;
             }
-            
             self.notify.notified().await;
         }
     }
 
     pub async fn set(&self, value: Option<T>) {
-        let mut lock = self.inner.lock().await;
-        *lock = value;
-        drop(lock);
-        self.notify.notify_one();
+        loop {
+            if !self.is_taken().await {
+                let mut lock = self.inner.lock().await;
+                *lock = value;
+                drop(lock);
+                self.notify.notify_one();
+                return;
+            }
+            self.notify.notified().await;
+        }
     }
 
     /// Gibt eine clonbare Referenz mit `'static`-Lifetime zurück.
     pub fn clone_handle(&self) -> Self {
         Self {
             inner: Arc::clone(&self.inner),
+            taken: Arc::clone(&self.taken),
             notify: Arc::clone(&self.notify),
         }
     }
