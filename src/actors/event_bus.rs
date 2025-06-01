@@ -15,7 +15,7 @@ pub(crate) enum AppEvent{
     ServerList(Vec<PiScopeServer>),
     DisconnectOpenPiScope,
     ConnectOpenPiScope(String),
-    PiScopeConnected(String),
+    PiScopeConnected(Option<String>),
 
 
 }

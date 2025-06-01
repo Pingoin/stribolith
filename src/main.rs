@@ -11,6 +11,7 @@ use actors::{
     event_bus::{EventBus, Subscribe}, gui_handler:: GuiHandler, pi_scope::{self}
 };
 use anyhow::Ok;
+use signals::InitGui;
 use slint::include_modules;
 use xactor::*;
 
@@ -37,6 +38,8 @@ async fn main() -> anyhow::Result<()> {
         event_bus_addr.send(Subscribe {
         recipient: actors::event_bus::Subscription::GuiHandler(gui_handler_addr.clone()),
     })?;
+
+    gui_handler_addr.call(InitGui{}).await?;
 
     main_window.run()?;
     Ok(())

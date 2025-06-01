@@ -1,0 +1,46 @@
+import { GridBox, Button,TextEdit  } from "std-widgets.slint";
+
+export global PiScopeLogic {
+    pure callback ConnectPiScopeHost(string);
+    pure callback DisconnectPiScopeHost();
+    in-out property <bool> connected:false;
+}
+
+export component PiScope {
+    in-out property <[string]> known_pi_scopes;
+    in-out property <string> manual_host: "openpiscope.local";
+    HorizontalLayout {
+        if PiScopeLogic.connected: Button {
+            text: "Disconnect";
+            clicked => {
+                PiScopeLogic.DisconnectPiScopeHost();
+            }
+        }
+        if !PiScopeLogic.connected:VerticalLayout {
+            HorizontalLayout {
+                TextEdit {
+                    height: 50px;
+                    width: 150px;
+                    text: manual_host;
+                    edited(text) => {
+                        manual_host = text;
+                    }
+                }
+
+                Button {
+                    text: "Manual Host";
+                    clicked => {
+                        PiScopeLogic.ConnectPiScopeHost(manual_host);
+                    }
+                }
+            }
+
+            for host in known_pi_scopes: Button {
+                text: "Connect to: " + host;
+                clicked => {
+                    PiScopeLogic.ConnectPiScopeHost(host);
+                }
+            }
+        }
+    }
+}

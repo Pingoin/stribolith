@@ -1,12 +1,17 @@
 import { VerticalBox, HorizontalBox, Button } from "std-widgets.slint";
-
+import { PiScope,PiScopeLogic } from "pi-scope.slint";
 export enum Page { Home, PiScope,About }
+
+
+export {PiScopeLogic}
 
 export component MainWindow inherits Window {
 
     // Aktuelle Seite (simuliert)
-    in-out property<Page> current_page: Home;
-
+    in-out property <Page> current_page: Home;
+    callback ConnectPiScopeHost(string);
+    in-out property <[string]> known_pi_scopes;
+    
     HorizontalBox {
         // Linke Navigation
         VerticalBox {
@@ -17,30 +22,39 @@ export component MainWindow inherits Window {
 
             Button {
                 text: "Home";
-                clicked => { root.current_page = Page.Home; }
+                clicked => {
+                    root.current_page = Page.Home;
+                }
             }
 
             Button {
                 text: "PiScope";
-                clicked => { root.current_page = Page.PiScope; }
+                clicked => {
+                    root.current_page = Page.PiScope;
+                }
             }
 
             Button {
                 text: "About";
-                clicked => { root.current_page = Page.About; }
+                clicked => {
+                    root.current_page = Page.About;
+                }
             }
         }
 
         // Rechte Inhaltsfläche (aktuelle Komponente)
         Rectangle {
-            background: black;
+            min-width: 200px;
             padding: 20px;
-            //HorizontalLayout.alignment: stretch;
-            //HorizontalLayout.fill: true;
-
-            if current_page==Page.Home: Text{text: "Home";}
-            if current_page==Page.PiScope: Text {text: "PiScope";}
-            if current_page== Page.About:Text{text: "About";}
+            if current_page == Page.Home: Text {
+                text: "Home";
+            }
+            if current_page == Page.PiScope: PiScope {
+                known_pi_scopes: known_pi_scopes;
+            }
+            if current_page == Page.About:Text {
+                text: "About";
+            }
         }
     }
 }

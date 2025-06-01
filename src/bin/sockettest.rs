@@ -8,7 +8,7 @@ async fn main() -> std::io::Result<()> {
 
     let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP))?;
     socket.set_reuse_address(true)?;
-    socket.set_reuse_port(true)?;
+    //socket.set_reuse_port(true)?;
     socket.set_broadcast(true)?;
     socket.bind(&addr.into())?;
 

@@ -41,12 +41,13 @@ impl PiScopeConnector {
         let client = OpenPiScopeServerClient::connect(format!("http://{}:50051", host)).await?;
 
         self.connection.set(Some(client)).await;
-        self.bus.send(AppEvent::PiScopeConnected(host))?;
+        self.bus.send(AppEvent::PiScopeConnected(Some(host)))?;
         Ok(())
     }
 
     async fn disconnect(&self) -> anyhow::Result<()> {
         self.connection.set(None).await;
+        self.bus.send(AppEvent::PiScopeConnected(None))?;
         Ok(())
     }
 }
@@ -62,13 +63,12 @@ impl Actor for PiScopeConnector {
 
             let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP)).unwrap();
             socket.set_reuse_address(true).unwrap();
-            socket.set_reuse_port(true).unwrap(); // <- das macht den Unterschied!
+            socket.set_broadcast(true).unwrap();
             socket.bind(&addr.into()).unwrap();
 
             let std_socket: std::net::UdpSocket = socket.into();
             std_socket.set_nonblocking(true).unwrap();
             let socket = UdpSocket::from_std(std_socket).unwrap();
-            //let socket = UdpSocket::bind("0.0.0.0:12961").await.unwrap();
             println!("Listening to port 12961");
             loop {
                 let mut buf = [0u8; 1024];
@@ -76,11 +76,6 @@ impl Actor for PiScopeConnector {
                 let (len, addr) = socket.recv_from(&mut buf).await.unwrap();
                 match Broadcast::decode(&buf[..len]) {
                     Ok(broadcast) => {
-                        println!(
-                            "Daten Empfangen von {}: {:?}",
-                            addr.ip(),
-                            &broadcast.magic_number
-                        );
                         if broadcast.magic_number == Constants::MagicNumber as u32 {
                             let server = PiScopeServer {
                                 host: addr.ip().to_string(),
