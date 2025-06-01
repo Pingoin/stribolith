@@ -1,0 +1,46 @@
+import { VerticalBox, HorizontalBox, Button } from "std-widgets.slint";
+
+export enum Page { Home, PiScope,About }
+
+export component MainWindow inherits Window {
+
+    // Aktuelle Seite (simuliert)
+    in-out property<Page> current_page: Home;
+
+    HorizontalBox {
+        // Linke Navigation
+        VerticalBox {
+            spacing: 10px;
+            padding: 10px;
+            width: 150px;
+            //background: #ddd;
+
+            Button {
+                text: "Home";
+                clicked => { root.current_page = Page.Home; }
+            }
+
+            Button {
+                text: "PiScope";
+                clicked => { root.current_page = Page.PiScope; }
+            }
+
+            Button {
+                text: "About";
+                clicked => { root.current_page = Page.About; }
+            }
+        }
+
+        // Rechte Inhaltsfläche (aktuelle Komponente)
+        Rectangle {
+            background: black;
+            padding: 20px;
+            //HorizontalLayout.alignment: stretch;
+            //HorizontalLayout.fill: true;
+
+            if current_page==Page.Home: Text{text: "Home";}
+            if current_page==Page.PiScope: Text {text: "PiScope";}
+            if current_page== Page.About:Text{text: "About";}
+        }
+    }
+}

@@ -1,8 +1,39 @@
-# This file is used for telling Rust-related tools
-# where various Rust crates are.
-# This also unifies `target` output folder and
-# various Rust configurations.
+[package]
+# Do not change the name of this crate.
+name = "stribolith"
+version = "0.1.0"
+edition = "2024"
 
-[workspace]
-resolver = "3"
-members = ["native/*"]
+[[bin]]
+name="sockettest"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+wildcard_imports = "deny"
+
+[dependencies]
+anyhow="1.0.98"
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1.45.1", features = [ "macros", "time","rt-multi-thread","sync"] }
+async-trait = "0.1.87"
+messages = "0.3.1"
+tonic = "0.13.1"
+critical-section = {version="1.2.0",features = ["std"]}
+prost = "0.13"
+xactor = { version = "0.7.11", default-features = false, features = ["runtime-tokio"] }
+dashmap="6.1.0"
+chrono = "0.4"
+slint = "1.8.0"
+socket2 = "0.5.10"
+nix = { version = "0.30.1", features = ["net"] }
+
+
+[build-dependencies]
+protoc-bin-vendored = "3"
+tonic-build = "0.13.1"
+slint-build = "1.8.0"
+
+# Uncomment below to target the web.
+# tokio_with_wasm = { version = "0.8.1", features = ["rt", "macros", "time"] }
+# wasm-bindgen = "0.2.100"

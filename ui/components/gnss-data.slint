@@ -1,0 +1,152 @@
+import { VerticalBox, HorizontalBox, GridBox } from "std-widgets.slint";
+
+export component GnssDataWidget {
+    in property <string> lat;
+    in property <string> lon;
+    in property <string> alt;
+
+    in property <string> leap_seconds;
+
+    in property <string> err_lon;
+    in property <string> err_lat;
+    in property <string> err_plane;
+    in property <string> err_alt;
+
+    in property <string> track;
+    in property <string> speed;
+    in property <string> climb;
+
+    in property <string> mode;
+    in property <string> err_track;
+    in property <string> err_speed;
+    in property <string> err_climb;
+
+    in property <[{prn:int,elevation:float, azimuth:float, signalStrenght:float,used:bool,system:int}]> satellites;
+
+    VerticalBox {
+        spacing: 16px;
+        padding: 16px;
+
+        // Position Card
+        Rectangle {
+            border-width: 1px;
+            border-color: #ccc;
+            background: black;
+            padding: 12px;
+
+            VerticalBox {
+                spacing: 8px;
+
+                Text {
+                    text: "Position: " + root.lat + ", " + root.lon + ", Alt: " + root.alt + " m";
+                }
+
+                Text {
+                    text: "Leap Seconds: " + root.leap_seconds;
+                }
+
+                Text {
+                    text: "Errors: Lon " + root.err_lon + " m, Lat " + root.err_lat + " m";
+                }
+
+                Text {
+                    text: "Plane Error: " + root.err_plane + " m, Altitude Error: " + root.err_alt + " m";
+                }
+
+                Text {
+                    text: "Track: " + root.track + "°"; 
+                }
+
+                Text {
+                    text: "Speed: " + root.speed + " m/s";
+                }
+
+                Text {
+                    text: "Climb: " + root.climb + " m/s";
+                }
+
+                Text {
+                    text: "Mode: " + root.mode;
+                }
+
+                Text {
+                    text: "Error (Track/Speed/Climb): " + root.err_track + "/" + root.err_speed + "/" + root.err_climb;
+                }
+            }
+        }
+
+        // Satellites Card
+        Rectangle {
+            border-width: 1px;
+            border-color: #ccc;
+            background: black;
+            padding: 12px;
+
+            VerticalBox {
+                spacing: 8px;
+
+                Text {
+                    text: "Satellites";
+                    font-size: 20px;
+                    font-weight: 600;
+                }
+
+                VerticalBox {
+                    spacing: 6px;
+                    HorizontalBox {
+                        Text {
+                            text: "PRN";
+                        }
+
+                        Text {
+                            text: "Elevation";
+                        }
+
+                        Text {
+                            text: "Azimuth";
+                        }
+
+                        Text {
+                            text: "Signal";
+                        }
+
+                        Text {
+                            text: "Used";
+                        }
+
+                        Text {
+                            text: "System";
+                        }
+                    }
+                    // Satellite Rows
+                    for sat in root.satellites: HorizontalBox {
+                        Text {
+                            text: sat.prn;
+                        }
+
+                        Text {
+                            text: sat.elevation;
+                        }
+
+                        Text {
+                            text: sat.azimuth;
+                        }
+
+                        Text {
+                            text: sat.signalStrenght;
+                        }
+
+                        Text {
+                            text: sat.used == true ? "✓" : "✗"; 
+                            color: sat.used == true ? green : red;
+                        }
+
+                        Text {
+                            text: sat.system;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
