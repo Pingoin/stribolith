@@ -2,8 +2,9 @@ import { VerticalBox, HorizontalBox, Button } from "std-widgets.slint";
 import { PiScope,PiScopeLogic } from "pi-scope.slint";
 export enum Page { Home, PiScope,About }
 
-
+import { GnssState} from "components/gnss-data.slint";
 export {PiScopeLogic}
+export { GnssState }
 
 export component MainWindow inherits Window {
 
@@ -44,7 +45,8 @@ export component MainWindow inherits Window {
 
         // Rechte Inhaltsfläche (aktuelle Komponente)
         Rectangle {
-            min-width: 200px;
+            min-width: 600px;
+            min-height: 500px;
             padding: 20px;
             if current_page == Page.Home: Text {
                 text: "Home";

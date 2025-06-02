@@ -1,4 +1,5 @@
 import { GridBox, Button,TextEdit  } from "std-widgets.slint";
+import { GnssDataWidget } from "components/gnss-data.slint";
 
 export global PiScopeLogic {
     pure callback ConnectPiScopeHost(string);
@@ -42,5 +43,6 @@ export component PiScope {
                 }
             }
         }
+        GnssDataWidget {}
     }
 }

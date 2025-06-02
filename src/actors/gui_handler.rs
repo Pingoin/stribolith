@@ -1,7 +1,7 @@
 use slint::{ComponentHandle, SharedString, Weak};
 use xactor::{Actor, Addr, Context, Handler};
 
-use crate::{MainWindow, PiScopeLogic, signals::InitGui};
+use crate::{GnssState, MainWindow, PiScopeLogic, signals::InitGui};
 
 use super::event_bus::{AppEvent, EventBus};
 
@@ -31,16 +31,51 @@ impl Handler<AppEvent> for GuiHandler {
                     window
                         .set_known_pi_scopes(std::rc::Rc::new(slint::VecModel::from(hosts)).into())
                 });
-            },
+            }
             AppEvent::PiScopeConnected(host) => {
                 let _ = self.window.upgrade_in_event_loop(move |window| {
-                    let connection=match host {
-                        Some(_) =>true,
-                        None =>false,
+                    let connection = match host {
+                        Some(_) => true,
+                        None => false,
                     };
                     window.global::<PiScopeLogic>().set_connected(connection);
                 });
-            },
+            }
+            AppEvent::UpdateGnss(gnss) => {
+                let _ = self.window.upgrade_in_event_loop(move |window| {
+
+                    let sats:Vec< crate::Sattelite>= gnss.satellites.iter().map(|s| {
+                        crate::Sattelite {
+                            azimuth:s.azimuth,
+                            elevation:s.elevation,
+                            prn:s.prn, 
+                            signalStrenght:s.signal_strength, 
+                            system: s.system().as_str_name().into(), 
+                            used: s.used}
+                            
+                        
+                    }).collect();
+
+                    window.global::<GnssState>().set_gnss(crate::GnssData {
+                        alt: gnss.alt,
+                        climb: gnss.climb,
+                        err_alt: gnss.estimated_error_altitude,
+                        err_climb: gnss.estimated_error_climb,
+                        err_lat: gnss.estimated_error_latitude,
+                        err_lon: gnss.estimated_error_longitude,
+                        err_plane: gnss.estimated_error_plane,
+                        err_speed: gnss.estimated_error_speed,
+                        err_track: gnss.estimated_error_track,
+                        lat: gnss.lat as f32,
+                        leap_seconds: gnss.leap_seconds,
+                        long: gnss.lon as f32,
+                        mode: gnss.mode().as_str_name().into(),
+                        satellites:sats.as_slice().into(),
+                        speed: gnss.speed,
+                        track: gnss.track,
+                    });
+                });
+            }
             _ => (),
         }
     }
@@ -61,7 +96,7 @@ impl Handler<InitGui> for GuiHandler {
             let callback_bus = bus.clone();
             window
                 .global::<PiScopeLogic>()
-                .on_DisconnectPiScopeHost (move || {
+                .on_DisconnectPiScopeHost(move || {
                     println!("Connect");
                     let _ = callback_bus.send(AppEvent::DisconnectOpenPiScope);
                 });

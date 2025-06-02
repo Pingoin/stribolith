@@ -1,28 +1,36 @@
 import { VerticalBox, HorizontalBox, GridBox } from "std-widgets.slint";
 
+    export struct Sattelite{
+        prn:int,elevation:float, azimuth:float, signalStrenght:float,used:bool,system:string}
+
+    export struct GnssData {
+        lat:float,
+        long:float,
+        alt:float,
+        leap_seconds:int,
+        err_lon:float,
+        err_lat:float,
+        err_plane:float,
+        err_alt:float,
+
+        track:float,
+        speed:float,
+        climb:float,
+
+        err_track:float,
+        err_speed:float,
+        err_climb:float,
+
+        mode:string,
+
+        satellites:[Sattelite],
+    }
+
+    export global GnssState {
+    in-out property <GnssData> gnss;
+}
+
 export component GnssDataWidget {
-    in property <string> lat;
-    in property <string> lon;
-    in property <string> alt;
-
-    in property <string> leap_seconds;
-
-    in property <string> err_lon;
-    in property <string> err_lat;
-    in property <string> err_plane;
-    in property <string> err_alt;
-
-    in property <string> track;
-    in property <string> speed;
-    in property <string> climb;
-
-    in property <string> mode;
-    in property <string> err_track;
-    in property <string> err_speed;
-    in property <string> err_climb;
-
-    in property <[{prn:int,elevation:float, azimuth:float, signalStrenght:float,used:bool,system:int}]> satellites;
-
     VerticalBox {
         spacing: 16px;
         padding: 16px;
@@ -38,39 +46,39 @@ export component GnssDataWidget {
                 spacing: 8px;
 
                 Text {
-                    text: "Position: " + root.lat + ", " + root.lon + ", Alt: " + root.alt + " m";
+                    text: "Position: " + GnssState.gnss.lat + ", " + GnssState.gnss.long + ", Alt: " + GnssState.gnss.alt + " m";
                 }
 
                 Text {
-                    text: "Leap Seconds: " + root.leap_seconds;
+                    text: "Leap Seconds: " + GnssState.gnss.leap_seconds;
                 }
 
                 Text {
-                    text: "Errors: Lon " + root.err_lon + " m, Lat " + root.err_lat + " m";
+                    text: "Errors: Lon " + GnssState.gnss.err_lon + " m, Lat " + GnssState.gnss.err_lat + " m";
                 }
 
                 Text {
-                    text: "Plane Error: " + root.err_plane + " m, Altitude Error: " + root.err_alt + " m";
+                    text: "Plane Error: " + GnssState.gnss.err_plane + " m, Altitude Error: " + GnssState.gnss.err_alt + " m";
                 }
 
                 Text {
-                    text: "Track: " + root.track + "°"; 
+                    text: "Track: " + GnssState.gnss.track + "°"; 
                 }
 
                 Text {
-                    text: "Speed: " + root.speed + " m/s";
+                    text: "Speed: " + GnssState.gnss.speed + " m/s";
                 }
 
                 Text {
-                    text: "Climb: " + root.climb + " m/s";
+                    text: "Climb: " + GnssState.gnss.climb + " m/s";
                 }
 
                 Text {
-                    text: "Mode: " + root.mode;
+                    text: "Mode: " + GnssState.gnss.mode;
                 }
 
                 Text {
-                    text: "Error (Track/Speed/Climb): " + root.err_track + "/" + root.err_speed + "/" + root.err_climb;
+                    text: "Error (Track/Speed/Climb): " + GnssState.gnss.err_track + "/" + GnssState.gnss.err_speed + "/" + GnssState.gnss.err_climb;
                 }
             }
         }
@@ -118,7 +126,7 @@ export component GnssDataWidget {
                         }
                     }
                     // Satellite Rows
-                    for sat in root.satellites: HorizontalBox {
+                    for sat in GnssState.gnss.satellites: HorizontalBox {
                         Text {
                             text: sat.prn;
                         }

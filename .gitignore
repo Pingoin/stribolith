@@ -52,5 +52,5 @@ app.*.map.json
 /lib/src/bincode
 /lib/src/serde
 /lib/src/bindings
-/native/hub/proto
-/native/hub/src/generated
+proto
+src/generated

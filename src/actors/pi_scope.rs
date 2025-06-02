@@ -64,6 +64,8 @@ impl Actor for PiScopeConnector {
             let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP)).unwrap();
             socket.set_reuse_address(true).unwrap();
             socket.set_broadcast(true).unwrap();
+            #[cfg(not(target_os = "windows"))]
+            socket.set_reuse_port(true).unwrap();
             socket.bind(&addr.into()).unwrap();
 
             let std_socket: std::net::UdpSocket = socket.into();
